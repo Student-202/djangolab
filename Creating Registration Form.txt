@@ -1,0 +1,40 @@
+Ex3: Creating Registration Form
+Coding:
+
+models.py
+
+from django.db import models
+class UserRegistration(models.Model):
+    username = models.CharField(max_length=100)
+    email = models.EmailField()
+    password = models.CharField(max_length=100)
+
+forms.py
+
+from django import forms
+from .models import UserRegistration
+class UserRegistrationForm(forms.ModelForm):
+    class Meta:
+        model = UserRegistration
+        fields = ['username', 'email', 'password']
+
+views.py
+
+from .forms import UserRegistrationForm
+def register(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            username = request.POST.get('username')
+
+            # Redirect to a success page           
+            return render(request,'success.html',{'username' : username})
+    else:
+        form = UserRegistrationForm()
+    return render(request, 'signup.html', {'form': form})
+
+urls.py
+
+urlpatterns = [
+    path('signup/', views.register, name='signup'),
+]

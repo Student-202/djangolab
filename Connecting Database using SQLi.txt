@@ -1,0 +1,120 @@
+ex.6: Connecting Database using SQLite
+Coding:
+
+Models.py:
+
+from django.db import models
+class MyModel(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    def __str__(self):
+        return self.name
+
+views.py:
+
+from django.shortcuts import render,get_object_or_404
+from django.http import HttpResponse
+from django.conf import settings
+from .models import MyModel
+def create(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        MyModel.objects.create(name=name, description=description)
+        return HttpResponse("Record created successfully")
+    return render(request, 'create.html')
+
+def read(request):
+    objects = MyModel.objects.all()
+    return render(request, 'read.html', {'objects': objects})
+
+
+def update(request, pk):
+    instance = get_object_or_404(MyModel, pk=pk)
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        instance.name = name
+        instance.description = description
+        instance.save()
+        return HttpResponse("Record updated successfully")
+    return render(request, 'update.html', {'instance': instance})
+
+def delete(request, pk):
+    instance = get_object_or_404(MyModel, pk=pk)
+    if request.method == 'POST':
+        instance.delete()
+        return HttpResponse("Record deleted successfully")
+    return render(request, 'delete.html', {'instance': instance})
+
+create.html:
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create</title>
+</head>
+<body>
+    <h1>Create Record</h1>
+    <form method="post">
+        {% csrf_token %}
+        Name: <input type="text" name="name"><br>
+        Description: <textarea name="description"></textarea><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
+read.html:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Read</title>
+</head>
+<body>
+    <h1>Read Records</h1>
+    <ul>
+    {% for object in objects %}
+        <li>{{ object.name }} - {{ object.description }}</li>
+    {% empty %}
+        <li>No records found</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
+
+update.html:
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update</title>
+</head>
+<body>
+    <h1>Update Record</h1>
+    <form method="post">
+        {% csrf_token %}
+        Name: <input type="text" name="name" value="{{ instance.name }}"><br>
+        Description: <textarea name="description">{{ instance.description }}</textarea><br>
+        <input type="submit" value="Update">
+    </form>
+</body>
+</html>
+
+delete.html:
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete</title>
+</head>
+<body>
+    <h1>Delete Record</h1>
+    <p>Are you sure you want to delete "{{ instance.name }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <input type="submit" value="Delete">
+    </form>
+</body>
+</html>
+
+

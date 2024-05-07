@@ -1,0 +1,135 @@
+Ex2:Creating and Working with Template
+Coding:
+
+Settings.py:-
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'djangoapp1.apps.Djangoapp1Config',
+]
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },  }, ]
+
+Views.py:-
+
+from django.shortcuts import render
+from django.http import HttpResponse
+
+def home(request):
+    return render(request,"home.html")
+
+def checker(request):
+    if request.method=='POST':
+        oddeven=int(request.POST.get('oddeven',0))
+        return render(request,'checker.html',{'oddeven':oddeven})
+    return render(request,"checker.html")
+
+def names(request):
+    names=["Hello","Hai","World","Awesome","Great","Kind"]
+    if(request.method=='POST'):
+        ch=request.POST.get('ch')
+        filtered_names = [name for name in names if name.startswith(ch)]
+        return render(request,'names.html',{'names':filtered_names})
+    return render(request,'names.html')
+
+home.html:-
+
+<!DOCTYPE html>
+<html>
+    <title>Home page</title>
+    <body>
+        <center>
+            <h1>Kamaraj College of Engineering and Technology</h1>
+            <h2>Web Applications using Django Framework - Exercise 2</h2>
+            <h3>
+                Name:B.Gomathy<br>
+                Roll No: 21UIT012
+            </h3>
+        </center>
+    </body>
+</html>
+
+Checker.html:
+
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Number Checker</title> 
+</head>
+    <body>
+        <form method="post">
+            {% csrf_token %}
+            <label for="oddeven">Enter a number:</label> 
+            <input type="number" id="oddeven" name="oddeven">
+            <button type="submit">Check</button>
+        </form>
+        {% if oddeven %} 
+            {% if oddeven|divisibleby:2 %} 
+                <p>{{oddeven}} is a even number</p> 
+            {% else %} 
+                <p>{{oddeven}} is a odd number</p> 
+            {% endif %} 
+        {% endif %} 
+    </body>
+</html>
+
+Names.html:
+
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <title>Number Checker</title> 
+</head>
+    <body>
+        <form method="post">
+            {% csrf_token %}
+            <label for="ch">Enter a character:</label> 
+            <input type="text" id="ch" name="ch">
+            <button type="submit">Search</button>
+        </form>
+        {% if names %}
+            <ul>
+                {% for name in names %}
+                    <li>{{ name }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </body>
+</html>
+
+Urls.py:-
+
+from django.contrib import admin
+from django.urls import path,include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('',include('djangoapp2.urls'))
+]
+Urls.py:(app)
+from django.urls import path
+from .import views
+urlpatterns=[
+    path('',views.home,name="home"),
+    path('checker/',views.checker,name="cheker"),
+    path('names/',views.names,name="names"),
+]
+
